@@ -2,7 +2,7 @@
 # gitflow.pr.main.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T14:40:24.113Z
-# Modified: 2024-02-20T19:21:02.601Z
+# Modified: 2024-02-20T19:30:40.718Z
 on:
   pull_request:
     types:
@@ -80,32 +80,21 @@ jobs:
 
           if [[ "$GITHUB_HEAD_REF" =~ ^[Rr][Ee][Ll][Ee][Aa][Ss][Ee]/(.+) ]]; then
             VERSION_NAME=${BASH_REMATCH[1]}
-            # Check whether it is a pull request
-            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
-              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' || $GITHUB_EVENT_ACTION == 'reopened' ]]; then
-                # The version function is active
-                VERSION_NAME_CLEAN=$VERSION_NAME
-                echo "Pull Request von release/$VERSION_NAME erkannt"
-                VERSION_UPDATE=true
-                echo "Check version update and perform if necessary"
-                BUILD=true
-                echo "Build was requested."
-              fi
-            fi
+            VERSION_NAME_CLEAN=$VERSION_NAME
+            echo "Pull Request von release/$VERSION_NAME erkannt"
+            VERSION_UPDATE=true
+            echo "Check version update and perform if necessary"
+            BUILD=true
+            echo "Build was requested."
           elif [[ "$GITHUB_HEAD_REF" =~ ^[Hh][Oo][Tt][Ff][Ii][Xx]/(.+) ]]; then
             VERSION_NAME=${BASH_REMATCH[1]}
-            # Check whether it is a pull request
-            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
-              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' || $GITHUB_EVENT_ACTION == 'reopened' ]]; then
-                # The version function is active
-                VERSION_NAME_CLEAN=$VERSION_NAME
-                echo "Pull Request von hotfix/$VERSION_NAME erkannt"
-                VERSION_UPDATE=true
-                echo "Check version update and perform if necessary"
-                BUILD=true
-                echo "Build was requested."
-              fi
-            fi
+            # The version function is active
+            VERSION_NAME_CLEAN=$VERSION_NAME
+            echo "Pull Request von hotfix/$VERSION_NAME erkannt"
+            VERSION_UPDATE=true
+            echo "Check version update and perform if necessary"
+            BUILD=true
+            echo "Build was requested."
           else
             echo "PR does not originate from a permitted branch. Workflow is skipped."
             exit 1

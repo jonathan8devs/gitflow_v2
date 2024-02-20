@@ -2,7 +2,7 @@
 # gitflow.create.release.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T12:39:28.503Z
-# Modified: 2024-02-20T19:19:52.966Z
+# Modified: 2024-02-20T19:29:16.403Z
 on:
   workflow_dispatch:
     inputs:
@@ -70,3 +70,4 @@ jobs:
           body: "Pull request for hotfix version ${{ steps.create_temporary_name.outputs.temporary_hotfix_name }}"
           base: main
           commit-message: "Change to avoid creating an empty Pull Request."
+          token: ${{ secrets.REPOSITORY_TOKEN }}
