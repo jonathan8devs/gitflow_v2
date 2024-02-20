@@ -18,4 +18,4 @@ REPOSITORY_TOKEN # Token um Änderungen am Repository vornehmen zu dürfen
 SECURITY_CHECK_GITLEAKS_LICENSE
 ```
 
-adassdasdas
+Falsch benannter Branch auf release
