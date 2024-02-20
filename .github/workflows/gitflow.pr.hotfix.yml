@@ -1,0 +1,203 @@
+# Author: Jonathan Starck (jonathan.starck@aiddevs.com)
+# gitflow.pr.hotfix.yml (c) 2024
+# Desc: description
+# Created:  2024-02-20T13:03:13.504Z
+# Modified: 2024-02-20T13:47:20.285Z
+on:
+  pull_request:
+    branches:
+      - 'hotfix/*'
+name: "⚙️ Gitflow: PR to hotfix"
+jobs:
+  #SECTION - Check for security vulnerabilities
+  security_check:
+    name: "Search for security vulnerabilities"
+    if: ${{ vars.SECURITY_CHECK_DISABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "Get .gitleaks.toml"
+        if: ${{ vars.SECURITY_CHECK_CUSTOM_CONFIG == 'true' }}
+        run: |
+          curl -H 'Authorization: token ${{ secrets.REPOSITORY_TOKEN }}' \
+          -H 'Accept: application/vnd.github.v3.raw' \
+          -o .gitleaks.toml \
+          -L https://api.github.com/repos/${{ vars.SECURITY_CHECK_CUSTOM_CONFIG_REPO }}/contents/.gitleaks.toml?ref=main
+      - name: "Run gitleaks"
+        uses: gitleaks/gitleaks-action@v2.3.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPOSITORY_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.SECURITY_CHECK_GITLEAKS_LICENSE}}
+          GITLEAKS_NOTIFY_USER_LIST: ${{ vars.SECURITY_CHECK_NOTIFY_USER_LIST }}
+  #!SECTION
+  #SECTION - Checking the prerequisites
+  situation_analysis:
+    name: "Checking the prerequisites"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checking via Bashscript"
+        env:
+          GITHUB_REF: ${{ github.ref }}       
+          GITHUB_REF_NAME: ${{ github.ref_name }} 
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_BASE_REF: ${{ github.event.base_ref }}
+          GITHUB_EVENT_CREATED: ${{ github.event.created }}
+          GITHUB_EVENT_DELETED: ${{ github.event.created }}
+          GITHUB_EVENT_FORCED: ${{ github.event.forced }}
+          GITHUB_EVENT_ACTION: ${{ github.event.action }}
+          GITHUB_EVENT_REF: ${{ github.event.ref }}
+          VERSION_DISABLED: ${{ vars.VERSION_DISABLED }}
+        run: |
+          # Variables defined for later use
+          VERSION_UPDATE=false
+          VERSION_NAME=
+          VERSION_NAME_CLEAN=
+          BUILD=false
+
+          # Identify via branch name.
+          if [[ "$GITHUB_HEAD_REF" =~ ^[Ff][Ee][Aa][Tt][Uu][Rr][Ee]/(.+) ]]; then
+            VERSION_NAME=${BASH_REMATCH[1]}
+            # Check whether it is a pull request
+            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
+              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' || $GITHUB_EVENT_ACTION == 'reopened' ]]; then
+                # The version function is active
+                VERSION_NAME_CLEAN=hotfix-feature--$VERSION_NAME
+                echo "Pull Request von hotfix/$VERSION_NAME erkannt"
+                VERSION_UPDATE=true
+                echo "Check version update and perform if necessary"
+                BUILD=true
+                echo "Build was requested."
+              fi
+            fi
+          elif [[ "$GITHUB_HEAD_REF" =~ ^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]-[Uu][Pp][Dd][Aa][Tt][Ee]/(.+) ]]; then
+            VERSION_NAME=${BASH_REMATCH[1]}
+            # Check whether it is a pull request
+            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
+              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' ]]; then
+                echo "Pull Request von version-update/$VERSION_NAME erkannt"
+                VERSION_UPDATE=false
+                echo "No version update necessary because this branch already performs this"
+                BUILD=false
+                echo "Build is not necessary"
+              fi
+            fi
+          else
+            echo "PR does not originate from a permitted branch. Workflow is skipped."
+            exit 1
+          fi
+
+          # Check whether the version function is deactivated
+          if [ "$VERSION_DISABLED" = "true" ]; then
+            VERSION_UPDATE=false
+          fi
+          echo "run_version_update=$VERSION_UPDATE" >> "$GITHUB_OUTPUT"
+          echo "version_name_clean=$VERSION_NAME_CLEAN" >> "$GITHUB_OUTPUT"
+          echo "run_build=$BUILD" >> "$GITHUB_OUTPUT"
+          exit 0
+        id: situation_analysis
+    outputs:
+      run_version_update: ${{ steps.situation_analysis.outputs.run_version_update }}
+      version_name_clean: ${{ steps.situation_analysis.outputs.version_name_clean }}
+      run_build: ${{ steps.situation_analysis.outputs.run_build }}
+  #!SECTION
+  #SECTION - Function for updating the version
+  version_update:
+    name: "Performs the check and, if necessary, the update"
+    needs:
+      - security_check
+      - situation_analysis
+    if: ${{ !failure() && needs.situation_analysis.outputs.run_version_update == 'true'}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Install of command-line processor: yq'
+        uses: dcarbone/install-yq-action@v1.1.1
+        with:
+          version: "v4.35.1"
+          download-compressed: "true"
+          force: "false"
+      - name: 'Check installed yq Version'
+        run: |
+          which yq
+          yq --version
+      - name: "Repository Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: "Check whether an update of the version is necessary"
+        env:
+          VERSION_FILE_PATH: ${{ vars.VERSION_FILE_PATH }}
+          VERSION_NAME_CLEAN: ${{needs.situation_analysis.outputs.version_name_clean}}
+        run: |
+          CREATE_PULL_REQUEST=false
+          CURRENT_VERSION_NAME=$(yq eval '.info.version' "$VERSION_FILE_PATH")
+          BUILD=false
+          if [[ "$CURRENT_VERSION_NAME" == "$VERSION_NAME_CLEAN" ]]; then
+            echo "Version identical: $CURRENT_VERSION_NAME"
+            CREATE_PULL_REQUEST=false
+            BUILD=true
+            echo "No update necessary"
+          else
+            echo "Versions different: current $CURRENT_VERSION_NAME, new version $VERSION_NAME_CLEAN"
+            # Update YAML file
+            yq eval ".info.version = \"$VERSION_NAME_CLEAN\"" -i "$VERSION_FILE_PATH"
+            echo "YAML file updated: $VERSION_NAME_CLEAN"
+            CREATE_PULL_REQUEST=true
+            BUILD=false
+            echo "Update must be carried out"
+          fi
+          echo "create_pull_request=$CREATE_PULL_REQUEST" >> "$GITHUB_OUTPUT"
+          echo "run_build=$BUILD" >> "$GITHUB_OUTPUT"
+          exit 0
+        id: check_necessity
+      - name: "Create Pull Request"
+        if: ${{ steps.check_necessity.outputs.create_pull_request == 'true' }}
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: version-update/${{needs.situation_analysis.outputs.version_name_clean}}
+          title: "version-update/${{needs.situation_analysis.outputs.version_name_clean}}"
+          body: "Update Version-File to ${{needs.situation_analysis.outputs.version_name_clean}}"
+          labels: automerge,!work in progress
+          base:  ${{ github.head_ref }}
+          token: ${{ secrets.REPOSITORY_TOKEN }}
+        id: create_pull_request
+      - name: "Automerge of created Pull Request"
+        if:  ${{ steps.check_necessity.outputs.create_pull_request == 'true' }}
+        uses: pascalgn/automerge-action@v0.16.2
+        env:
+          GITHUB_TOKEN: "${{ secrets.REPOSITORY_TOKEN }}"
+          MERGE_LABELS: "automerge,!work in progress"
+          UPDATE_RETRIES: "25"
+          UPDATE_RETRY_SLEEP: "10000"
+          MERGE_RETRIES: "30"
+          MERGE_RETRY_SLEEP: "10000"
+          MERGE_DELETE_BRANCH: "true"
+          MERGE_REQUIRED_APPROVALS: "0"
+          PULL_REQUEST: "${{ steps.create_pull_request.outputs.pull-request-number }}"
+        id: automerge_pull_request
+    outputs:
+      create_pull_request: ${{ steps.check_necessity.outputs.create_pull_request }}
+      pull_request_number: ${{ steps.create_pull_request.outputs.pull-request-number }}
+      run_build: ${{ steps.check_necessity.outputs.run_build }}
+  #!SECTION
+  #SECTION - Build Prozess
+  build:
+    name: "Performs the check and, if necessary, the update"
+    needs:
+      - security_check
+      - situation_analysis
+      - version_update
+    if: | 
+      ${{
+        !failure() &&
+        (needs.situation_analysis.outputs.run_version_update == 'false' && needs.situation_analysis.outputs.run_build == 'true') ||
+        (needs.version_update.outputs.create_pull_request == 'false' && needs.version_update.outputs.run_build == 'true')}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Output'
+        run: echo "RUN"
