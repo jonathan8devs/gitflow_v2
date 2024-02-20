@@ -2,7 +2,7 @@
 # gitflow.push.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T13:55:19.011Z
-# Modified: 2024-02-20T16:38:52.329Z
+# Modified: 2024-02-20T19:04:33.667Z
 on:
   workflow_dispatch:
   push:
@@ -145,6 +145,7 @@ jobs:
   build:
     name: "Test Build"
     needs:
+      - security_check
       - situation_analysis
       - version_update
     if: | 

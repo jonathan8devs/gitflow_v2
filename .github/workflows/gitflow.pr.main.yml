@@ -2,7 +2,7 @@
 # gitflow.pr.main.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T14:40:24.113Z
-# Modified: 2024-02-20T16:43:10.055Z
+# Modified: 2024-02-20T19:04:04.973Z
 on:
   pull_request:
     types:
@@ -188,6 +188,7 @@ jobs:
   build:
     name: "Build Test"
     needs:
+      - security_check
       - situation_analysis
       - version_update
     if: | 

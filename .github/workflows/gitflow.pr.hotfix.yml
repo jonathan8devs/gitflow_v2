@@ -2,7 +2,7 @@
 # gitflow.pr.hotfix.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T13:03:13.504Z
-# Modified: 2024-02-20T16:39:29.628Z
+# Modified: 2024-02-20T19:03:59.347Z
 on:
   workflow_dispatch:
   pull_request:
@@ -191,13 +191,15 @@ jobs:
   build:
     name: "Test Build"
     needs:
+      - security_check
       - situation_analysis
       - version_update
     if: | 
       ${{
         !failure() &&
         (needs.situation_analysis.outputs.run_version_update == 'false' && needs.situation_analysis.outputs.run_build == 'true') ||
-        (needs.version_update.outputs.create_pull_request == 'false' && needs.version_update.outputs.run_build == 'true')}}
+        (needs.version_update.outputs.create_pull_request == 'false' && needs.version_update.outputs.run_build == 'true')
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
