@@ -2,8 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T13:47:29.323Z
-
+# Modified: 2024-02-20T14:07:34.601Z
 on:
   pull_request:
     branches:
@@ -39,6 +38,7 @@ jobs:
   situation_analysis:
     name: "Checking the prerequisites"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: "Checking via Bashscript"
         env:
@@ -144,6 +144,7 @@ jobs:
       - situation_analysis
     if: ${{ !failure() && needs.situation_analysis.outputs.run_version_update == 'true'}}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: 'Install of command-line processor: yq'
         uses: dcarbone/install-yq-action@v1.1.1
@@ -228,7 +229,8 @@ jobs:
         (needs.situation_analysis.outputs.run_version_update == 'false' && needs.situation_analysis.outputs.run_build == 'true') ||
         (needs.version_update.outputs.create_pull_request == 'false' && needs.version_update.outputs.run_build == 'true')}}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: 'Output'
-        run: echo "RUN"
+        run: echo "Gitflow PR to Dev runs"
 

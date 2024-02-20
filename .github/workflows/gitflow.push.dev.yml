@@ -1,13 +1,13 @@
 # Author: Jonathan Starck (jonathan.starck@aiddevs.com)
-# gitflow.pr.hotfix.yml (c) 2024
+# gitflow.push.dev.yml (c) 2024
 # Desc: description
-# Created:  2024-02-20T13:03:13.504Z
-# Modified: 2024-02-20T14:07:03.180Z
+# Created:  2024-02-20T13:55:19.011Z
+# Modified: 2024-02-20T14:04:28.922Z
 on:
-  pull_request:
+  push:
     branches:
-      - 'release/*'
-name: "⚙️ Gitflow: PR to release"
+      - dev
+name: "⚙️ Gitflow: Push to dev"
 jobs:
   #SECTION - Check for security vulnerabilities
   security_check:
@@ -42,63 +42,17 @@ jobs:
     steps:
       - name: "Checking via Bashscript"
         env:
-          GITHUB_REF: ${{ github.ref }}       
-          GITHUB_REF_NAME: ${{ github.ref_name }} 
-          GITHUB_HEAD_REF: ${{ github.head_ref }}
-          GITHUB_BASE_REF: ${{ github.base_ref }}
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-          GITHUB_EVENT_BASE_REF: ${{ github.event.base_ref }}
-          GITHUB_EVENT_CREATED: ${{ github.event.created }}
-          GITHUB_EVENT_DELETED: ${{ github.event.created }}
-          GITHUB_EVENT_FORCED: ${{ github.event.forced }}
-          GITHUB_EVENT_ACTION: ${{ github.event.action }}
-          GITHUB_EVENT_REF: ${{ github.event.ref }}
           VERSION_DISABLED: ${{ vars.VERSION_DISABLED }}
         run: |
           # Variables defined for later use
-          VERSION_UPDATE=false
-          VERSION_NAME=
-          VERSION_NAME_CLEAN=
-          BUILD=false
-
-          # Identify via branch name.
-          if [[ "$GITHUB_HEAD_REF" =~ ^[Ff][Ee][Aa][Tt][Uu][Rr][Ee]/(.+) ]]; then
-            VERSION_NAME=${BASH_REMATCH[1]}
-            # Check whether it is a pull request
-            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
-              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' || $GITHUB_EVENT_ACTION == 'reopened' ]]; then
-                # The version function is active
-                VERSION_NAME_CLEAN=release-feature--$VERSION_NAME
-                echo "Pull Request von release/$VERSION_NAME erkannt"
-                VERSION_UPDATE=true
-                echo "Check version update and perform if necessary"
-                BUILD=true
-                echo "Build was requested."
-              fi
-            fi
-          elif [[ "$GITHUB_HEAD_REF" =~ ^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]-[Uu][Pp][Dd][Aa][Tt][Ee]/(.+) ]]; then
-            VERSION_NAME=${BASH_REMATCH[1]}
-            # Check whether it is a pull request
-            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
-              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' ]]; then
-                echo "Pull Request von version-update/$VERSION_NAME erkannt"
-                VERSION_UPDATE=false
-                echo "No version update necessary because this branch already performs this"
-                BUILD=false
-                echo "Build is not necessary"
-              fi
-            fi
-          else
-            echo "PR does not originate from a permitted branch. Workflow is skipped."
-            exit 1
-          fi
-
+          VERSION_UPDATE=true
+          BUILD=true
           # Check whether the version function is deactivated
           if [ "$VERSION_DISABLED" = "true" ]; then
             VERSION_UPDATE=false
           fi
           echo "run_version_update=$VERSION_UPDATE" >> "$GITHUB_OUTPUT"
-          echo "version_name_clean=$VERSION_NAME_CLEAN" >> "$GITHUB_OUTPUT"
+          echo "version_name_clean=dev" >> "$GITHUB_OUTPUT"
           echo "run_build=$BUILD" >> "$GITHUB_OUTPUT"
           exit 0
         id: situation_analysis
@@ -203,4 +157,4 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 'Output'
-        run: echo "Gitflow PR to Release runs"
+        run: echo "Gitflow Push Dev run through"
