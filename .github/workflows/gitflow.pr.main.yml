@@ -2,7 +2,7 @@
 # gitflow.pr.main.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T14:40:24.113Z
-# Modified: 2024-02-20T16:21:38.928Z
+# Modified: 2024-02-20T16:43:10.055Z
 on:
   pull_request:
     types:
@@ -14,7 +14,7 @@ jobs:
   #SECTION - Check for security vulnerabilities
   security_check:
     name: "Search for security vulnerabilities"
-    if: ${{ vars.SECURITY_CHECK_DISABLED == 'false' }}
+    if: ${{github.event.pull_request.merged == true && vars.SECURITY_CHECK_DISABLED == 'false'}}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -39,6 +39,7 @@ jobs:
   #SECTION - Checking the prerequisites
   situation_analysis:
     name: "Checking the prerequisites"
+    if: ${{github.event.pull_request.merged == true}}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -102,10 +103,8 @@ jobs:
   #SECTION - Function for updating the version
   version_update:
     name: "Performs the check and, if necessary, the update"
-    needs:
-      - security_check
-      - situation_analysis
-    if: ${{ !failure() && needs.situation_analysis.outputs.run_version_update == 'true'}}
+    needs: situation_analysis
+    if: ${{ github.event.pull_request.merged == true && !failure() && needs.situation_analysis.outputs.run_version_update == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -189,11 +188,10 @@ jobs:
   build:
     name: "Build Test"
     needs:
-      - security_check
       - situation_analysis
       - version_update
     if: | 
-      ${{!failure()}}
+      ${{github.event.pull_request.merged == true && !failure()}}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
