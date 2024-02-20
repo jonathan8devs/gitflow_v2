@@ -2,7 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T20:42:20.842Z
+# Modified: 2024-02-20T20:51:49.453Z
 on:
   workflow_dispatch:
   pull_request:
@@ -215,16 +215,14 @@ jobs:
       pull_request_number: ${{ steps.create_pull_request.outputs.pull-request-number }}
       run_build: ${{ steps.check_necessity.outputs.run_build }}
   #!SECTION
-  #SECTION - Build Prozess
-  build:
-    name: "Test Build"
+  process_check:
+    name: 'Check the previous process'
     needs:
       - security_check
       - situation_analysis
       - version_update
     if: ${{ !failure() }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - name: 'Check the previous process'
         run: |
@@ -232,11 +230,27 @@ jobs:
           run_build_situation_analysis="${{needs.situation_analysis.outputs.run_build}}"
           create_pull_request="${{needs.version_update.outputs.create_pull_request}}"
           run_build_version_update="${{needs.version_update.outputs.run_build}}"
-
           if [[ "$run_version_update" == "false" && "$run_build_situation_analysis" == "true" ]] || [[ "$create_pull_request" == "false" && "$run_build_version_update" == "true" ]]; then
               echo "Bedingung erfüllt, führe entsprechende Aktionen aus."
+              echo "run_build=1" >> "$GITHUB_OUTPUT"
               exit 0
           else
               echo "Bedingung nicht erfüllt."
-              exit 1
+              echo "run_build=0" >> "$GITHUB_OUTPUT"
+              exit 0
           fi
+        id: process_check
+    outputs:
+      run_build: ${{ steps.process_check.outputs.run_build }}
+    
+  #SECTION - Build Prozess
+  build:
+    name: "Test Build"
+    needs: process_check
+    if: ${{ needs.process_check.outputs.run_build }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 'Build run'
+        run: |
+          echo "Build run"
