@@ -2,7 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T20:06:37.482Z
+# Modified: 2024-02-20T20:07:30.727Z
 on:
   workflow_dispatch:
   pull_request:
@@ -221,7 +221,7 @@ jobs:
     needs:
       - situation_analysis
       - version_update
-    if: | 
+    if: > 
       ${{
         (!failure() && needs.situation_analysis.outputs.run_version_update == 'false' && needs.situation_analysis.outputs.run_build == 'true') ||
         (!failure() && needs.version_update.outputs.create_pull_request == 'false' && needs.version_update.outputs.run_build == 'true')}}
