@@ -1,0 +1,23 @@
+# Author: Jonathan Starck (jonathan.starck@aiddevs.com)
+# test_behavior.yml (c) 2024
+# Desc: description
+# Created:  2024-02-20T10:47:55.105Z
+# Modified: 2024-02-20T11:04:52.093Z
+on:
+  workflow_dispatch:
+name: "Test behavior of Github"
+jobs:
+  set_env:
+    name: Setze Umgebungsvariable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setze GITHUB_ENV-Variable
+        run: |
+          echo "FOO=bar" >> $GITHUB_ENV
+  use_env:
+    name: Verwende Umgebungsvariable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ausgabe der Umgebungsvariable
+        run: |
+          echo "FOO=${{ env.FOO }}"
