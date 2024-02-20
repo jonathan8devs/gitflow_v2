@@ -2,7 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T20:55:01.225Z
+# Modified: 2024-02-20T20:56:35.317Z
 on:
   workflow_dispatch:
   pull_request:
@@ -247,7 +247,7 @@ jobs:
   build:
     name: "Test Build"
     needs: process_check
-    if: ${{ needs.process_check.outputs.run_build == 'true'}}
+    if: ${{ !failure() && needs.process_check.outputs.run_build == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
