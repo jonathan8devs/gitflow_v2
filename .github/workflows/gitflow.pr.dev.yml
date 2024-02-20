@@ -2,7 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T19:57:47.517Z
+# Modified: 2024-02-20T20:03:21.246Z
 on:
   workflow_dispatch:
   pull_request:
@@ -219,7 +219,6 @@ jobs:
   build:
     name: "Test Build"
     needs:
-      - security_check
       - situation_analysis
       - version_update
     if: | 
