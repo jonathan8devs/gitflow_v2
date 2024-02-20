@@ -17,3 +17,6 @@ VERSION_FILE_PATH=swagger/api.yml
 REPOSITORY_TOKEN # Token um Änderungen am Repository vornehmen zu dürfen
 SECURITY_CHECK_GITLEAKS_LICENSE
 ```
+
+
+Das ist ein Feature test
