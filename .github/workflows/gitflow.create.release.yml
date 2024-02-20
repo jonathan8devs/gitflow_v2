@@ -2,7 +2,7 @@
 # gitflow.create.release.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T12:39:28.503Z
-# Modified: 2024-02-20T12:57:24.701Z
+# Modified: 2024-02-20T19:19:52.966Z
 on:
   workflow_dispatch:
     inputs:
@@ -53,6 +53,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.REPOSITORY_TOKEN }}
       # Define a temporary name for the `hotfix` branch and write it to a file to avoid an empty PullRequest
       - name: "Set current Date"
         run: |
