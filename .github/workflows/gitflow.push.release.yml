@@ -2,7 +2,7 @@
 # gitflow.push.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T13:55:19.011Z
-# Modified: 2024-02-20T19:04:33.667Z
+# Modified: 2024-02-20T19:34:49.718Z
 on:
   workflow_dispatch:
   push:
@@ -54,7 +54,7 @@ jobs:
             VERSION_UPDATE=false
           fi
           echo "run_version_update=$VERSION_UPDATE" >> "$GITHUB_OUTPUT"
-          echo "version_name_clean=${GITHUB_REF_NAME#release/}-RC" >> "$GITHUB_OUTPUT"
+          echo "version_name_clean=${GITHUB_REF_NAME#release/}" >> "$GITHUB_OUTPUT"
           echo "run_build=$BUILD" >> "$GITHUB_OUTPUT"
           exit 0
         id: situation_analysis
