@@ -2,7 +2,7 @@
 # gitflow.push.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T13:55:19.011Z
-# Modified: 2024-02-20T15:56:53.847Z
+# Modified: 2024-02-20T16:38:52.329Z
 on:
   workflow_dispatch:
   push:
@@ -66,9 +66,7 @@ jobs:
   #SECTION - Function for updating the version
   version_update:
     name: "Performs the check and, if necessary, the update"
-    needs:
-      - security_check
-      - situation_analysis
+    needs: situation_analysis
     if: ${{ !failure() && needs.situation_analysis.outputs.run_version_update == 'true'}}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -145,9 +143,8 @@ jobs:
   #!SECTION
   #SECTION - Build Prozess
   build:
-    name: "Performs the check and, if necessary, the update"
+    name: "Test Build"
     needs:
-      - security_check
       - situation_analysis
       - version_update
     if: | 
