@@ -2,7 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T20:58:35.898Z
+# Modified: 2024-02-20T21:00:18.286Z
 on:
   workflow_dispatch:
   pull_request:
@@ -215,6 +215,7 @@ jobs:
       pull_request_number: ${{ steps.create_pull_request.outputs.pull-request-number }}
       run_build: ${{ steps.check_necessity.outputs.run_build }}
   #!SECTION
+  #SECTION - Check the previous process
   process_check:
     name: 'Check the previous process'
     needs:
@@ -242,7 +243,7 @@ jobs:
         id: process_check
     outputs:
       run_build: ${{ steps.process_check.outputs.run_build }}
-    
+  #!SECTION
   #SECTION - Build Prozess
   build:
     name: "Test Build"
@@ -254,3 +255,4 @@ jobs:
       - name: 'Build run'
         run: |
           echo "Build run"
+  #!SECTION
