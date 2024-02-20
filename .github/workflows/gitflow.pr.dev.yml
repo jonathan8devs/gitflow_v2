@@ -2,7 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T20:18:53.456Z
+# Modified: 2024-02-20T20:24:31.490Z
 on:
   workflow_dispatch:
   pull_request:
@@ -221,14 +221,15 @@ jobs:
     needs:
       - situation_analysis
       - version_update
-    if: | 
-      ${{
-        (needs.situation_analysis.outputs.run_version_update == 'false' && needs.situation_analysis.outputs.run_build == 'true') ||
-        (needs.version_update.outputs.create_pull_request == 'false' && needs.version_update.outputs.run_build == 'true')
-      }}
+    if: ${{ !failure() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: 'Output'
+        if: |
+          ${{
+          (needs.situation_analysis.outputs.run_version_update == 'false' && needs.situation_analysis.outputs.run_build == 'true') ||
+          (needs.version_update.outputs.create_pull_request == 'false' && needs.version_update.outputs.run_build == 'true')
+          }}
         run: echo "Gitflow PR to Dev runs"
 
