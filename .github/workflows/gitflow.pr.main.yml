@@ -2,7 +2,7 @@
 # gitflow.pr.main.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T14:40:24.113Z
-# Modified: 2024-02-20T15:47:18.444Z
+# Modified: 2024-02-20T15:57:11.051Z
 on:
   pull_request:
     types:
@@ -14,7 +14,7 @@ jobs:
   #SECTION - Check for security vulnerabilities
   security_check:
     name: "Search for security vulnerabilities"
-    if: ${{ vars.SECURITY_CHECK_DISABLED == 'true' }}
+    if: ${{ vars.SECURITY_CHECK_DISABLED == 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
