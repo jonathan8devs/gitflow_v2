@@ -2,8 +2,9 @@
 # gitflow.push.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T13:55:19.011Z
-# Modified: 2024-02-20T14:17:46.858Z
+# Modified: 2024-02-20T14:27:44.555Z
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'hotfix/*'
