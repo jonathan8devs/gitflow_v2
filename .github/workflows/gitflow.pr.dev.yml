@@ -2,7 +2,7 @@
 # gitflow.pr.dev.yml (c) 2024
 # Desc: description
 # Created:  2024-02-19T21:51:52.992Z
-# Modified: 2024-02-20T20:57:45.008Z
+# Modified: 2024-02-20T20:58:35.898Z
 on:
   workflow_dispatch:
   pull_request:
@@ -232,7 +232,7 @@ jobs:
           run_build_version_update="${{needs.version_update.outputs.run_build}}"
           if [[ "$run_version_update" == "false" && "$run_build_situation_analysis" == "true" ]] || [[ "$create_pull_request" == "false" && "$run_build_version_update" == "true" ]]; then
               echo "Bedingung erfüllt, führe entsprechende Aktionen aus."
-              echo "run_build=false" >> "$GITHUB_OUTPUT"
+              echo "run_build=true" >> "$GITHUB_OUTPUT"
               exit 0
           else
               echo "Bedingung nicht erfüllt."
