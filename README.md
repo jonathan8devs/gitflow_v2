@@ -19,4 +19,4 @@ SECURITY_CHECK_GITLEAKS_LICENSE
 ```
 
 
-Das ist ein Feature test
+Feature-Test
