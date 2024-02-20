@@ -54,7 +54,7 @@ jobs:
             VERSION_UPDATE=false
           fi
           echo "run_version_update=$VERSION_UPDATE" >> "$GITHUB_OUTPUT"
-          echo "version_name_clean=${GITHUB_REF_NAME#hotfix/}-RC" >> "$GITHUB_OUTPUT"
+          echo "version_name_clean=${GITHUB_REF_NAME#hotfix/}" >> "$GITHUB_OUTPUT"
           echo "run_build=$BUILD" >> "$GITHUB_OUTPUT"
           exit 0
         id: situation_analysis

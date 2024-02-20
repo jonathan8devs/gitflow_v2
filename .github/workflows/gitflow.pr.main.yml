@@ -2,7 +2,7 @@
 # gitflow.pr.main.yml (c) 2024
 # Desc: description
 # Created:  2024-02-20T14:40:24.113Z
-# Modified: 2024-02-20T19:21:02.601Z
+# Modified: 2024-02-20T19:32:25.348Z
 on:
   pull_request:
     types:
@@ -46,33 +46,11 @@ jobs:
       - name: "Checking via Bashscript"
         env:
           VERSION_DISABLED: ${{ vars.VERSION_DISABLED }}
-          GITHUB_CONTEXT: ${{ toJson(github) }}
           GITHUB_REF: ${{ github.ref }}       
-          GITHUB_REF_NAME: ${{ github.ref_name }} # Name of the current branch or tag
+          GITHUB_REF_NAME: ${{ github.ref_name }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
-          GITHUB_BASE_REF: ${{ github.base_ref }} # Name of the base branch for pull requests
-          GITHUB_EVENT_NAME: ${{ github.event_name }} # Type of the triggering event (e.g. push, pull_request)
-          GITHUB_EVENT_BASE_REF: ${{ github.event.base_ref }}
-          GITHUB_EVENT_COMPARE: ${{ github.event.compare }}
-          GITHUB_EVENT_CREATED: ${{ github.event.created }}
-          GITHUB_EVENT_DELETED: ${{ github.event.created }}
-          GITHUB_EVENT_FORCED: ${{ github.event.forced }}
-          GITHUB_EVENT_ACTION: ${{ github.event.action }}
-          GITHUB_EVENT_REF: ${{ github.event.ref }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
         run: |
-          echo "GITHUB_REF: $GITHUB_REF"
-          echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
-          echo "GITHUB_HEAD_REF: $GITHUB_HEAD_REF"
-          echo "GITHUB_BASE_REF: $GITHUB_BASE_REF"
-          echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
-          echo "GITHUB_EVENT_BASE_REF: $GITHUB_EVENT_BASE_REF"
-          echo "GITHUB_EVENT_COMPARE: $GITHUB_EVENT_COMPARE"
-          echo "GITHUB_EVENT_CREATED: $GITHUB_EVENT_CREATED"
-          echo "GITHUB_EVENT_DELETED: $GITHUB_EVENT_DELETED"
-          echo "GITHUB_EVENT_FORCED: $GITHUB_EVENT_FORCED"
-          echo "GITHUB_EVENT_ACTION: $GITHUB_EVENT_ACTION"
-          echo "GITHUB_EVENT_REF: $GITHUB_EVENT_REF"
-          echo "GITHUB_CONTEXT: $GITHUB_CONTEXT"
           # Variables defined for later use
           VERSION_NAME_CLEAN=
           VERSION_UPDATE=true
@@ -80,32 +58,21 @@ jobs:
 
           if [[ "$GITHUB_HEAD_REF" =~ ^[Rr][Ee][Ll][Ee][Aa][Ss][Ee]/(.+) ]]; then
             VERSION_NAME=${BASH_REMATCH[1]}
-            # Check whether it is a pull request
-            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
-              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' || $GITHUB_EVENT_ACTION == 'reopened' ]]; then
-                # The version function is active
-                VERSION_NAME_CLEAN=$VERSION_NAME
-                echo "Pull Request von release/$VERSION_NAME erkannt"
-                VERSION_UPDATE=true
-                echo "Check version update and perform if necessary"
-                BUILD=true
-                echo "Build was requested."
-              fi
-            fi
+            VERSION_NAME_CLEAN=$VERSION_NAME
+            echo "Pull Request von release/$VERSION_NAME erkannt"
+            VERSION_UPDATE=true
+            echo "Check version update and perform if necessary"
+            BUILD=true
+            echo "Build was requested."
           elif [[ "$GITHUB_HEAD_REF" =~ ^[Hh][Oo][Tt][Ff][Ii][Xx]/(.+) ]]; then
             VERSION_NAME=${BASH_REMATCH[1]}
-            # Check whether it is a pull request
-            if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
-              if [[ $GITHUB_EVENT_ACTION == 'opened' || $GITHUB_EVENT_ACTION == 'synchronize' || $GITHUB_EVENT_ACTION == 'reopened' ]]; then
-                # The version function is active
-                VERSION_NAME_CLEAN=$VERSION_NAME
-                echo "Pull Request von hotfix/$VERSION_NAME erkannt"
-                VERSION_UPDATE=true
-                echo "Check version update and perform if necessary"
-                BUILD=true
-                echo "Build was requested."
-              fi
-            fi
+            # The version function is active
+            VERSION_NAME_CLEAN=$VERSION_NAME
+            echo "Pull Request von hotfix/$VERSION_NAME erkannt"
+            VERSION_UPDATE=true
+            echo "Check version update and perform if necessary"
+            BUILD=true
+            echo "Build was requested."
           else
             echo "PR does not originate from a permitted branch. Workflow is skipped."
             exit 1
