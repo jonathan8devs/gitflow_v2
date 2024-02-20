@@ -48,4 +48,5 @@ jobs:
           echo "GITHUB_EVENT_REF: $GITHUB_EVENT_REF"
           echo "GITHUB_EVENT_REF: $GITHUB_EVENT_PULL_REQUEST_MERGED"
           echo "GITHUB_CONTEXT: $GITHUB_CONTEXT"
+          echo "Test"
   #!SECTION
